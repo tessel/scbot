@@ -7,6 +7,13 @@ require('dotenv').config();
 var owner = 'tessel';
 var repo = 'scbot';
 
+var authorizedUsers = [
+  'tcr',
+  'frijol',
+  'rwaldron',
+  'hipsterbrown',
+];
+
 var github = new Client({
     debug: false,
     Promise: Promise
@@ -172,7 +179,7 @@ app.post('/', function (req, res) {
     let issue = json.issue.number;
     let body = json.comment.body;
     let user = json.comment.user.login;
-    if (user == 'tcr') {
+    if (authorizedUsers.indexOf(user) != -1) {
       handleCommand(body, issue);
     }
   }
@@ -281,7 +288,6 @@ function handleCommand(text: string, issue: string) {
     .catch(err => {
       console.log(err);
     });
-    // let text = "#scbot create next wednesday @frijol @tcr @hipsterbrown @rwaldron";
   } else {
     github.issues.createComment({
       owner,
