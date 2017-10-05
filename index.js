@@ -4,8 +4,8 @@ const Client = require('github');
 
 require('dotenv').config();
 
-var owner = 'tessel';
-var repo = 'project';
+var owner = process.env.REPO_OWNER;
+var repo = process.env.REPO_NAME;
 
 var authorizedUsers = [
   'tcr',
@@ -182,6 +182,19 @@ const app = express()
 
 app.use(bodyParser.json())
 
+app.use(function (req, res, next) {
+  if (req.query.secret != process.env.SCBOT_SECRET) {
+    res.status(401);
+    res.send('Unauthorized');
+    return;
+  }
+  return next();
+});
+
+app.get('/', function (req, res) {
+  res.send('scbot hello');
+});
+
 app.post('/', function (req, res) {
   let json = req.body;
   if (json.action == 'created' && ('comment' in json)) {
@@ -195,8 +208,8 @@ app.post('/', function (req, res) {
   res.json("cool")
 })
 
-app.listen(3000, function () {
-  console.log('Example app listening on port 3000!')
+app.listen(process.env.PORT, function () {
+  console.log(`Example app listening on port ${process.env.PORT}!`)
 })
 
 function handleCommand(text: string, issue: string) {
