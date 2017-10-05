@@ -5,7 +5,7 @@ const Client = require('github');
 require('dotenv').config();
 
 var owner = 'tessel';
-var repo = 'scbot';
+var repo = 'project';
 
 var authorizedUsers = [
   'tcr',
@@ -102,6 +102,7 @@ function createBranch(name) {
 function createIssue(lastprid: string, date: string, names: Array<string>) {
   let humandate = moment(chrono.parseDate(date)).format('ddd, MMM Do, YYYY');
 
+  console.log('creating issue');
   github.issues.create({
     owner,
     repo,
@@ -111,13 +112,18 @@ function createIssue(lastprid: string, date: string, names: Array<string>) {
   .then(res => {
     let prid = res.data.number;
     let out = issueTemplate(lastprid, date, prid, names);
+    console.log('updating issue');
     return updateIssue(date, String(prid), out);
-  });
+  })
+  .catch(err => {
+    console.error(err);
+  })
 }
 
 function updateIssue(date: string, prid: string, body: string) {
   let humandate = moment(chrono.parseDate(date)).format('ddd, MMM Do, YYYY');
 
+  console.log('-- editing issue');
   github.issues.edit({
     owner,
     repo,
@@ -126,6 +132,7 @@ function updateIssue(date: string, prid: string, body: string) {
     body,
   })
   .then(res => {
+    console.log('-- creating branch');
     return createBranch(`sc-agenda-${prid}`)
     .then(res => {
       console.log(res)
@@ -133,6 +140,7 @@ function updateIssue(date: string, prid: string, body: string) {
     })
   })
   .then(res => {
+    console.log('-- creating file');
     return github.repos.createFile({
       owner,
       repo,
@@ -147,6 +155,7 @@ function updateIssue(date: string, prid: string, body: string) {
     })
   })
   .then(_ => {
+    console.log('-- creating pr');
     return github.pullRequests.create({
       owner,
       repo,
