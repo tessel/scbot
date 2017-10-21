@@ -201,7 +201,7 @@ app.post('/', function (req, res) {
     let issue = json.issue.number;
     let body = json.comment.body;
     let user = json.comment.user.login;
-    if (authorizedUsers.indexOf(user) != -1) {
+    if (authorizedUsers.indexOf(user.toLowerCase()) != -1) {
       handleCommand(body, issue);
     }
   }
